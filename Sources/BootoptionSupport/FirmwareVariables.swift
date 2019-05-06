@@ -35,7 +35,6 @@ open class FirmwareVariables {
         public func createCFProperty(forKey key: String) -> CFTypeRef? {
                 return IORegistryEntryCreateCFProperty(options, key as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
         }
-
         
         public func dataValue(forGlobalVariable name: String) -> Data? {
                 let key = "8BE4DF61-93CA-11D2-AA0D-00E098032B8C:" + name

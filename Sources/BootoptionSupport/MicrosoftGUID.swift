@@ -22,11 +22,14 @@ public struct MicrosoftGUID: Equatable {
                 return components.joined(separator: "-")
         }
         
-        public mutating func data() -> Data {
+        public func data() -> Data {
                 var buffer = Data()
-                buffer.append(Data(buffer: UnsafeBufferPointer<UInt32>(start: &data1, count: 1)))
-                buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: &data2, count: 1)))
-                buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: &data3, count: 1)))
+                var mutableData1 = data1
+                var mutableData2 = data2
+                var mutableData3 = data3
+                buffer.append(Data(buffer: UnsafeBufferPointer<UInt32>(start: &mutableData1, count: 1)))
+                buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: &mutableData2, count: 1)))
+                buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: &mutableData3, count: 1)))
                 buffer.append(Data(data4))
                 return buffer
         }
@@ -65,6 +68,13 @@ public struct MicrosoftGUID: Equatable {
                 let data3: [UInt8] = [bytes.6, bytes.7].reversed()
                 let data4: [UInt8] = [bytes.8, bytes.9, bytes.10, bytes.11, bytes.12, bytes.13, bytes.14, bytes.15]
                 self.init(bytes: data1 + data2 + data3 + data4)
+        }
+        
+        public init?(uuidString: String) {
+                guard let uuid = UUID(uuidString: uuidString) else {
+                        return nil
+                }
+                self.init(uuid: uuid)
         }
         
         public init?() {

@@ -6,15 +6,17 @@
 
 import Foundation
 
-public struct HexViewer {
-        public var data: Data?
-        
-        public init(data: Data? = nil) {
-                self.data = data
+public protocol HexViewerDataSource {
+        var data: Data {
+                get
         }
+}
+
+public struct HexViewer {
+        public var dataSource: HexViewerDataSource?
         
         public var string: String? {
-                guard var buffer = data else {
+                guard var buffer = dataSource?.data else {
                         return nil
                 }
                 
@@ -29,7 +31,7 @@ public struct HexViewer {
                 repeat {
                         col += 1
                         
-                        let bytes = buffer.count > 1 ? [buffer.remove8(), buffer.remove8()] : [buffer.remove8()]
+                        let bytes: [UInt8] = buffer.count > 1 ? [buffer.remove(), buffer.remove()] : [buffer.remove()]
                         
                         bytes.forEach {
                                 output += String(format: "%02x", $0)

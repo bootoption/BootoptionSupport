@@ -7,8 +7,6 @@
 import Foundation
 import IOKit
 
-var standardError = FileHandle.standardError
-
 public struct Debug {
         private static let pid = getpid()
         
@@ -39,16 +37,18 @@ public struct Debug {
                 
                 let message = String(format: "%@%d %@ %@ • %@%@", color, pid, NSString(string: file).lastPathComponent, function, String(format: message, arguments: cVarArgArray), Debug.ANSI.reset)
 
-                standardError.write(string: message)
+                FileHandle.standardError.write(string: message)
                 #endif
         }
         
         private static func efiInfo() {
                 #if DEBUG
                 let efi = IORegistryEntryFromPath(kIOMasterPortDefault, "IODeviceTree:/efi")
+                
                 if let firmwareVendor = IORegistryEntryCreateCFProperty(efi, "firmware-vendor" as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue() as? Data {
-                        log("firmware-vendor: %@", type: .info, argsList: firmwareVendor.efiStringValue ?? firmwareVendor)
+                        log("firmware-vendor: %@", type: .info, argsList: String(UCS2Data: firmwareVendor) ?? firmwareVendor)
                 }
+                
                 if let firmwareRevision = IORegistryEntryCreateCFProperty(efi, "firmware-revision" as CFString, kCFAllocatorDefault, 0)?.takeRetainedValue() as? Data {
                         log("firmware-revision: %@", type: .info, argsList: firmwareRevision)
                 }
@@ -57,9 +57,10 @@ public struct Debug {
         
         public static func initialize(versionString: String) {
                 guard FirmwareVariables.default.dataValue(forVariable: "EmuVariableUefiPresent") == nil else {
-                        standardError.write(string: "EmuVariableUefiPresent found in options")
-                        exit(6)
+                        FileHandle.standardError.write(string: "EmuVariableUefiPresent found in options")
+                        exit(1)
                 }
+                
                 #if DEBUG
                 if let term = ProcessInfo.processInfo.environment["TERM"], term.contains("color") {
                         Debug.ANSI.green = "\u{001B}[0;32m"
@@ -67,8 +68,9 @@ public struct Debug {
                         Debug.ANSI.red = "\u{001B}[0;31m"
                         Debug.ANSI.reset = "\u{001B}[0;0m"
                 }
+                
                 Debug.log("Version %@", type: .info, argsList: versionString)
-                Debug.efiInfo()
+                Debug.efiInfo()                
                 #endif
         }
         
@@ -78,12 +80,11 @@ public struct Debug {
                 static var red = ""
                 static var reset = ""
         }
+        
+        public enum LogType {
+                case info
+                case warning
+                case error
+                case fault
+        }
 }
-
-public enum LogType {
-        case info
-        case warning
-        case error
-        case fault
-}
-

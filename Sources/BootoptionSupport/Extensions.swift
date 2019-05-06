@@ -1,5 +1,5 @@
 /*
- * extensions.swift
+ * Extensions.swift
  * Copyright © 2017-2019 vulgo
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -14,7 +14,7 @@ public extension Data {
                 var data = Data(capacity: len)
                 
                 for i in 0..<len {
-                        let j = hexString.index(hexString.startIndex, offsetBy: i*2)
+                        let j = hexString.index(hexString.startIndex, offsetBy: i * 2)
                         let k = hexString.index(j, offsetBy: 2)
                         let bytes = hexString[j..<k]
                         
@@ -39,6 +39,10 @@ public extension Data {
                 }
                 
                 return "0x" + String(utf16CodeUnits: chars, count: chars.count)
+        }
+        
+        mutating func append<T>(_ int: T) where T: FixedWidthInteger {
+                append(int.toData())
         }
         
         func toUInt8() -> UInt8 {
@@ -73,23 +77,30 @@ public extension Data {
                 return value
         }
         
+        mutating func remove<T>() -> T where T: FixedWidthInteger {
+                let range = 0..<T.bitWidth / 8
+                let buffer = self.subdata(in: range)
+                self.removeSubrange(range)
+                return buffer.withUnsafeBytes{$0.pointee}
+        }
+        
         @discardableResult mutating func remove64() -> UInt64 {
                 let range = Range(0...7)
-                let buffer: Data = self.subdata(in: range)
+                let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
                 return buffer.withUnsafeBytes{$0.pointee}
         }
         
         @discardableResult mutating func remove32() -> UInt32 {
                 let range = Range(0...3)
-                let buffer: Data = self.subdata(in: range)
+                let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
                 return buffer.withUnsafeBytes{$0.pointee}
         }
         
         @discardableResult mutating func remove16() -> UInt16 {
                 let range = Range(0...1)
-                let buffer: Data = self.subdata(in: range)
+                let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
                 return buffer.withUnsafeBytes{$0.pointee}
         }
@@ -98,43 +109,33 @@ public extension Data {
                 return self.remove(at: 0)
         }
         
-        @discardableResult mutating func removeData(bytes: Int) -> Data {
+        @discardableResult mutating func remove(count: Int) -> Data {
                 let start = self.startIndex
-                let end = index(start, offsetBy: bytes)
+                let end = index(start, offsetBy: count)
                 let range = start..<end
-                let buffer: Data = self.subdata(in: range)
+                let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
                 return buffer
         }
 }
 
-public extension UInt8 {
+public extension FixedWidthInteger {
         func toData() -> Data {
-                var value: UInt8 = self
-                return Data(buffer: UnsafeBufferPointer<UInt8>(start: &value, count: 1))
-        }
-}
-
-public extension UInt16 {
-        func toData() -> Data {
-                var value: UInt16 = self
-                return Data(buffer: UnsafeBufferPointer<UInt16>(start: &value, count: 1))
-        }
-}
-
-public extension UInt32 {
-        func toData() -> Data {
-                var value: UInt32 = self
-                return Data(buffer: UnsafeBufferPointer<UInt32>(start: &value, count: 1))
-        }
-}
-
-public extension UInt64 {
-        func toData() -> Data {
-                var value: UInt64 = self
-                return Data(buffer: UnsafeBufferPointer<UInt64>(start: &value, count: 1))
+                var value = self
+                return Data(buffer: UnsafeBufferPointer(start: &value, count: 1))
         }
         
+        var hexString: String {
+                return String(format: "0x%0\(bitWidth / 8)X", self as! CVarArg)
+        }
+        
+        var shortHexString: String {
+                return String(format: "0x%X", self as! CVarArg)
+        }
+        
+        var string: String {
+                return "\(self)"
+        }
 }
 
 public extension String {
@@ -164,72 +165,39 @@ public extension Array {
         }
 }
 
-public typealias BootNumber = UInt16
-public extension BootNumber {
-        public var variableName: String {
-                return String(format: "Boot%04X", self)
-        }
-}
-
-/* internal */
-
-internal extension UInt64 {
-        var hexString: String {
-                return String(format: "0x%016X", self)
-        }
-        
-        var shortHexString: String {
-                return String(format: "0x%X", self)
-        }
-        
-        var string: String {
-                return String(self)
-        }
-}
-
 internal extension UInt32 {
-        var hexString: String {
-                return String(format: "0x%08X", self)
-        }
-        
-        var shortHexString: String {
-                return String(format: "0x%X", self)
-        }
-        
-        var string: String {
-                return String(self)
-        }
-}
-
-internal extension UInt16 {
-        var hexString: String {
-                return String(format: "0x%04X", self)
-        }
-        
-        var shortHexString: String {
-                return String(format: "0x%X", self)
-        }
-        
-        var string: String {
-                return String(self)
-        }
-}
-
-internal extension UInt8 {
-        var hexString: String {
-                return String(format: "0x%02X", self)
-        }
-        
-        var shortHexString: String {
-                return String(format: "0x%X", self)
-        }
-        
-        var string: String {
-                return String(self)
+        var eisaPnpID: String? {
+                var buffer = self.toData()
+                switch buffer.remove16() {
+                case 0x41d0:
+                        let id: UInt16 = buffer.remove()
+                        return "PNP" + String(format: "%04X", id)
+                default:
+                        return nil
+                }
         }
 }
 
 internal extension String {
+        func stringFromSubSequence(startIndexOffsetBy offset: Int) -> String {
+                let start = index(startIndex, offsetBy: offset)
+                return String(self[start...])
+        }
+        
+        init?(UCS2Data: Data) {
+                var buffer = UCS2Data
+                
+                guard let string = buffer.removeEFIString() else {
+                        return nil
+                }
+                
+                if !buffer.isEmpty {
+                        Debug.log("UCS2 buffer is not empty, entire data: %@", type: .error, argsList: UCS2Data)
+                }
+                
+                self = string
+        }
+        
         func toUCS2Data(nullTerminated: Bool = true) -> Data? {
                 var data = Data()
                 
@@ -246,7 +214,7 @@ internal extension String {
                                 return nil
                         }
                         
-                        data.append(UniChar(scalar!.value).toData())
+                        data.append(UniChar(scalar!.value))
                 }
                 
                 if nullTerminated {
@@ -270,44 +238,36 @@ internal extension String {
                 
                 return data
         }
+        
+        var quoted: String {
+                return "\"" + self + "\""
+        }
 }
 
 internal extension Data {       
-        var efiStringValue: String? {
-                var buffer = self
-                
-                let string = buffer.removeEFIString()
-                
-                if string != nil, !buffer.isEmpty {
-                        Debug.log("EFI string buffer is not empty, entire data: %@", type: .error, argsList: self)
-                }
-                
-                return string
-        }
-        
-        private mutating func removeEFIString() -> String? {
+        mutating func removeEFIString() -> String? {
                 var data = [UniChar]()
+                
+                if self.count < 2 {
+                        Debug.log("No EFI string data to decode", type: .error)
+                        return nil
+                }
                 
                 while self.count >= 2 {
                         data.append(self.remove16())
-                        if data.last == 0x0000 {
+                        if data.last == 0 {
                                 break
                         }
-                }
-                
-                if data.count == 0 {
-                        Debug.log("No string data to decode", type: .error)
-                        return nil
                 }
                 
                 var string = ""
                 
                 for unichar in data {
-                        if unichar == 0x0000 {
+                        if unichar == 0 {
                                 /* Debug.log("\"%@\", %@", type: .info, argsList: string, data) */
                                 return string
-                        } else if unichar < 0x0020 || unichar > 0xD7FF {
-                                Debug.log("Unexpected UCS-16 value: %@", type: .warning, argsList: unichar.hexString)
+                        } else if unichar < 0x20 || unichar > 0xD7FF {
+                                Debug.log("Unexpected UCS2 value: %@", type: .warning, argsList: unichar.hexString)
                                 return nil
                         } else {
                                 string += "\(UnicodeScalar(unichar)!)"

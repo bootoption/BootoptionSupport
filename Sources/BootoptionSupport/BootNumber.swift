@@ -14,14 +14,6 @@ public extension UInt16 {
                 string = string.replacingOccurrences(of: "0X", with: "")                
                 string = string.replacingOccurrences(of: "BOOT", with: "")
                 
-                guard Set("ABCDEF1234567890").isSuperset(of: string) else {
-                        throw FirmwareVariablesError.invalidVariableName(string: variableName)
-                }
-                
-                guard string.count < 5 else {
-                        throw FirmwareVariablesError.invalidVariableName(string: variableName)
-                }
-                
                 guard let uint16 = UInt16(string, radix: 16) else {
                         throw FirmwareVariablesError.invalidVariableName(string: variableName)
                 }

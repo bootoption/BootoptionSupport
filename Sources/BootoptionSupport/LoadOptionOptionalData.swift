@@ -14,8 +14,8 @@ public struct LoadOptionOptionalData: HexViewerDataSource {
                 hexViewer.dataSource = self
         }
         
-        public init(data: Data) {
-                self.data = data
+        public init(data: Data?) {
+                self.data = data ?? Data()
                 hexViewer.dataSource = self
         }
         

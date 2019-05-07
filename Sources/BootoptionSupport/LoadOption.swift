@@ -88,9 +88,8 @@ public struct LoadOption {
                         devicePathList = try DevicePathList(data: Buffer(buffer.remove(count: devicePathListLength)))
                         
                         /* Optional data */
-                        if !buffer.isEmpty {
-                                optionalData = LoadOptionOptionalData(data: buffer)
-                        }
+                        optionalData = LoadOptionOptionalData(data: !buffer.isEmpty ? buffer : nil)
+
                 }
         }
         

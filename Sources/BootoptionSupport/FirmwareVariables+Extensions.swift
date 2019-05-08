@@ -91,6 +91,6 @@ public extension FirmwareVariables {
         }
         
         var NVRAMProtectionsEnabled: Bool {
-                return 64 & ((createCFProperty(forKey: "csr-active-config") as? Data)?.toUInt64() ?? 0) == 0
+                return 64 & (dataValue(forVariable: "csr-active-config")?.toUInt64() ?? 0) == 0
         }
 }

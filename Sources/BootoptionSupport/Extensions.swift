@@ -46,63 +46,47 @@ public extension Data {
         }
         
         func toUInt8() -> UInt8 {
-                let value: UInt8 = self.withUnsafeBytes {
-                        (pointer: UnsafePointer<UInt8>) -> UInt8 in
-                        return pointer.pointee
-                }
-                return value
+                return withUnsafeBytes { $0.load(as: UInt8.self) }
         }
         
         func toUInt16() -> UInt16 {
-                let value: UInt16 = self.withUnsafeBytes {
-                        (pointer: UnsafePointer<UInt16>) -> UInt16 in
-                        return pointer.pointee
-                }
-                return value
+                return withUnsafeBytes { $0.load(as: UInt16.self) }
         }
         
         func toUInt32() -> UInt32 {
-                let value: UInt32 = self.withUnsafeBytes {
-                        (pointer: UnsafePointer<UInt32>) -> UInt32 in
-                        return pointer.pointee
-                }
-                return value
+                return withUnsafeBytes { $0.load(as: UInt32.self) }
         }
         
         func toUInt64() -> UInt64 {
-                let value: UInt64 = self.withUnsafeBytes {
-                        (pointer: UnsafePointer<UInt64>) -> UInt64 in
-                        return pointer.pointee
-                }
-                return value
+                return withUnsafeBytes { $0.load(as: UInt64.self) }
         }
         
         mutating func remove<T>() -> T where T: FixedWidthInteger {
                 let range = 0..<T.bitWidth / 8
                 let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
-                return buffer.withUnsafeBytes{$0.pointee}
+                return buffer.withUnsafeBytes { $0.load(as: T.self) }
         }
         
         @discardableResult mutating func remove64() -> UInt64 {
                 let range = Range(0...7)
                 let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
-                return buffer.withUnsafeBytes{$0.pointee}
+                return buffer.withUnsafeBytes { $0.load(as: UInt64.self) }
         }
         
         @discardableResult mutating func remove32() -> UInt32 {
                 let range = Range(0...3)
                 let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
-                return buffer.withUnsafeBytes{$0.pointee}
+                return buffer.withUnsafeBytes { $0.load(as: UInt32.self) }
         }
         
         @discardableResult mutating func remove16() -> UInt16 {
                 let range = Range(0...1)
                 let buffer = self.subdata(in: range)
                 self.removeSubrange(range)
-                return buffer.withUnsafeBytes{$0.pointee}
+                return buffer.withUnsafeBytes { $0.load(as: UInt16.self) }
         }
         
         @discardableResult mutating func remove8() -> UInt8 {

@@ -18,14 +18,8 @@ public enum FirmwareVariablesError: Error, CustomStringConvertible {
                 if FirmwareVariables.default.NVRAMProtectionsEnabled {
                         switch self {
                         case .set(variable: let name):
-                                Debug.log("Error setting %@", type: .error, argsList: name)
-                                return "error setting variable, NVRAM protections may be enabled - see csrutil(8)"
-                        case .sync(variable: let name):
-                                Debug.log("Error syncing %@", type: .error, argsList: name)
-                                return "error syncing variable, NVRAM protections may be enabled - see csrutil(8)"
-                        case .delete(variable: let name):
-                                Debug.log("Error deleting %@", type: .error, argsList: name)
-                                return "error deleting variable, NVRAM protections may be enabled - see csrutil(8)"
+                                let shortName = name.split(separator: ":").last!
+                                return "failed to set '\(shortName)', NVRAM protections may be enabled - see csrutil(8)"
                         default:
                                 break
                         }
@@ -33,11 +27,11 @@ public enum FirmwareVariablesError: Error, CustomStringConvertible {
                 
                 switch self {
                 case .set(variable: let name):
-                        return "error setting '\(name)' firmware variable"
+                        return "failed to set '\(name)' firmware variable"
                 case .sync(variable: let name):
-                        return "error syncing '\(name)' firmware variable"
+                        return "failed to sync '\(name)' firmware variable"
                 case .delete(variable: let name):
-                        return "error deleting '\(name)' firmware variable"
+                        return "failed to delete '\(name)' firmware variable"
                 case .invalidVariableName(string: let string):
                         return "invalid variable name '\(string)'"
                 case .notFound(variable: let name):

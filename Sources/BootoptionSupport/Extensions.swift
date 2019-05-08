@@ -202,7 +202,7 @@ internal extension String {
                 }
                 
                 if nullTerminated {
-                        data.append(Data(bytes: [0x00, 0x00]))
+                        data.append(Data([0x00, 0x00]))
                 }
                 
                 return data
@@ -217,7 +217,7 @@ internal extension String {
                 var data = Data(self.utf8)
                 
                 if nullTerminated {
-                        data.append(Data(bytes: [0x00]))
+                        data.append(Data([0x00]))
                 }
                 
                 return data

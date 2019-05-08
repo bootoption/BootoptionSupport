@@ -16,7 +16,7 @@ public struct Loader {
         var filesystemPath: String {
                 let substring = path.stringFromSubSequence(startIndexOffsetBy: mountPoint.count)
                 let components = substring.split(separator: "/").filter({ !$0.isEmpty })
-                let filesystemPath = "\\" + components.joined(separator: "\\")
+                let filesystemPath = #"\"# + components.joined(separator: #"\"#)
                 Debug.log("Loader filesystem mount point: %@", type: .info, argsList: mountPoint)
                 Debug.log("Computed filesystem path: %@", type: .info, argsList: filesystemPath)
                 return filesystemPath

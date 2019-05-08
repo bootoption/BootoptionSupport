@@ -20,7 +20,7 @@ public class DevicePathList {
                         $0.type == DevicePathType.rawValue.end && $0.subType == DevicePathType.EndSubType.END_ENTIRE_DEVICE_PATH_SUBTYPE.rawValue
                 })
 
-                return slices.map { $0.map { "\\" + $0.description }.joined() }
+                return slices.map { $0.map { #"\"# + $0.description }.joined() }
         }
         
         public init(hardDriveDevicePath: MEDIA_HARD_DRIVE_DP, filePathDevicePath: MEDIA_FILEPATH_DP) throws {

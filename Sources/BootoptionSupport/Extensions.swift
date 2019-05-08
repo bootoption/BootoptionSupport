@@ -248,7 +248,7 @@ internal extension Data {
                 
                 for unichar in data {
                         if unichar == 0 {
-                                /* Debug.log("\"%@\", %@", type: .info, argsList: string, data) */
+                                /* Debug.log(#""%@", %@"#, type: .info, argsList: string, data) */
                                 return string
                         } else if unichar < 0x20 || unichar > 0xD7FF {
                                 Debug.log("Unexpected UCS2 value: %@", type: .warning, argsList: unichar.hexString)
@@ -257,7 +257,7 @@ internal extension Data {
                                 string += "\(UnicodeScalar(unichar)!)"
                         }
                 }
-                /* Debug.log("\"%@\", %@", type: .info, argsList: string, data) */
+                /* Debug.log(#""%@", %@"#, type: .info, argsList: string, data) */
                 return string
         }
 }

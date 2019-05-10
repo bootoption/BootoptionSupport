@@ -32,7 +32,7 @@ public struct LoadOptionOptionalData: HexViewerDataSource {
                         }
                         if isClover {
                                 Debug.log("Optional data string for Clover, appending 2 null bytes", type: .warning)
-                                data += Data(bytes: [0x00, 0x00])
+                                data += Data([0x00, 0x00])
                         }
                         self.data = data
                         Debug.log("Ascii encoded optional data string: %@", type: .info, argsList: data)

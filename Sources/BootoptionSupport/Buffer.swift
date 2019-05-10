@@ -26,10 +26,7 @@ public class Buffer {
         func read<T>() -> T where T: FixedWidthInteger {
                 let size = MemoryLayout<T>.size
                 let bytes = data.subdata(in: offset..<offset + size)
-                let value: T = bytes.withUnsafeBytes {
-                        (pointer: UnsafePointer<T>) -> T in
-                        return pointer.pointee
-                }
+                let value: T = bytes.withUnsafeBytes { $0.load(as: T.self) }
                 offset += size
                 return value
         }

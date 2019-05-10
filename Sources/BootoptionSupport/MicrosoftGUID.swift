@@ -42,18 +42,9 @@ public struct MicrosoftGUID: Equatable {
                 guard data.count == 16 else {
                         return nil
                 }
-                data1 = data[0...3].withUnsafeBytes {
-                        (pointer: UnsafePointer<UInt32>) -> UInt32 in
-                        return pointer.pointee
-                }
-                data2 = data[4...5].withUnsafeBytes {
-                        (pointer: UnsafePointer<UInt16>) -> UInt16 in
-                        return pointer.pointee
-                }
-                data3 = data[6...7].withUnsafeBytes {
-                        (pointer: UnsafePointer<UInt16>) -> UInt16 in
-                        return pointer.pointee
-                }
+                data1 = data[0...3].withUnsafeBytes { return $0.load(as: UInt32.self) }
+                data2 = data[4...5].withUnsafeBytes { return $0.load(as: UInt16.self) }
+                data3 = data[6...7].withUnsafeBytes { return $0.load(as: UInt16.self) }
                 data4 = Array<UInt8>(data[8...15])
         }
         

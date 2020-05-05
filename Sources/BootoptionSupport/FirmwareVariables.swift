@@ -94,6 +94,7 @@ open class FirmwareVariables {
                 let result = IORegistryEntrySetCFProperty(options, kIONVRAMDeletePropertyKey as CFString, variable as CFString)
                 switch result {
                 case KERN_SUCCESS:
+                        try syncNow(variable)
                         return
                 default:
                         throw FirmwareVariablesError.delete(variable: name)

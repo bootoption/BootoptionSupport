@@ -106,7 +106,9 @@ public extension Data {
 public extension FixedWidthInteger {
         func toData() -> Data {
                 var value = self
-                return Data(buffer: UnsafeBufferPointer(start: &value, count: 1))
+                return withUnsafePointer(to: &value) {
+                        Data(buffer: UnsafeBufferPointer(start: $0, count: 1))
+                }
         }
         
         var hexString: String {

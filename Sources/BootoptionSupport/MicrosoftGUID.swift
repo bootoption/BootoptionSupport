@@ -27,9 +27,15 @@ public struct MicrosoftGUID: Equatable {
                 var mutableData1 = data1
                 var mutableData2 = data2
                 var mutableData3 = data3
-                buffer.append(Data(buffer: UnsafeBufferPointer<UInt32>(start: &mutableData1, count: 1)))
-                buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: &mutableData2, count: 1)))
-                buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: &mutableData3, count: 1)))
+                withUnsafePointer(to: &mutableData1) {
+                        buffer.append(Data(buffer: UnsafeBufferPointer<UInt32>(start: $0, count: 1)))
+                }
+                withUnsafePointer(to: &mutableData2) {
+                        buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: $0, count: 1)))
+                }
+                withUnsafePointer(to: &mutableData3) {
+                        buffer.append(Data(buffer: UnsafeBufferPointer<UInt16>(start: $0, count: 1)))
+                }
                 buffer.append(Data(data4))
                 return buffer
         }
